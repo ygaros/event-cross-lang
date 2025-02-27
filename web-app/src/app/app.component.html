@@ -1,0 +1,40 @@
+<div>
+    <form (submit)="addProduct()">
+      <label for="name">Product Name:</label>
+      <input type="text" id="name" [(ngModel)]="newProduct.name" [ngModelOptions]="{standalone: true}">
+  
+      <label for="price">Price:</label>
+      <input type="number" id="price" [(ngModel)]="newProduct.price" [ngModelOptions]="{standalone: true}">
+  
+      <label for="quantity">Quantity:</label>
+      <input type="number" id="quantity" [(ngModel)]="newProduct.quantity" [ngModelOptions]="{standalone: true}">
+  
+      <button type="submit">Add Product</button>
+    </form>
+  
+    <ul>
+      <li *ngFor="let product of products">{{ product.name }} - Price: {{ product.price }} - Quantity: {{ product.quantity }}</li>
+    </ul>
+    <button type="button" (click)="buttonHandler()">Buy</button>
+  </div>
+  <div>
+    <form (submit)="payForLastOrder()">
+      
+      <label for="orderId">OrderId:</label>
+      <input type="text" id="orderId" [(ngModel)]="lastOrderId" [ngModelOptions]="{standalone: true}">
+
+      <label for="type">Pay type</label>
+      <input type="text" id="type" [(ngModel)]="payment.type" [ngModelOptions]="{standalone: true}">
+  
+      <label for="status">Status:</label>
+      <select name="status" [(ngModel)]="payment.status" [ngModelOptions]="{standalone: true}">
+        <option value="INITIALIZED">INITIALIZED</option>
+        <option value="IN_PROGRESS">IN_PROGRESS</option>
+        <option value="FINISHED">FINISHED</option>
+      </select>
+  
+  
+      <button type="submit">Pay</button>
+    </form>
+    <button type="button" (click)="buttonHandler()">Buy</button>
+  </div>

@@ -1,0 +1,47 @@
+pipeline {
+    agent {
+        label 'linux'
+    }
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+    
+    tools { go '1.21' }
+
+    stages{
+        stage('Checkout'){
+            steps{
+                echo 'Checkout... ' + env.BRANCH_NAME
+                checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs
+                        ])
+            }
+        }
+        stage('Tests'){
+            steps{
+                sh 'go test'
+            }
+        }
+        stage('Build'){
+            steps{
+                sh 'go build'
+            }
+        }
+        stage('Build & Push image'){
+            steps{
+                script{
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {   
+                        def app = docker.build("ygaros/order")  
+                            
+                        //app.push("${env.BUILD_NUMBER}")            
+                        app.push("latest")        
+                    }   
+                }  
+            }
+            
+        }    
+    }
+}

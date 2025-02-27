@@ -1,0 +1,41 @@
+pipeline {
+    agent {
+        label 'linux'
+    }
+    options {
+        timeout(time: 10, unit: 'MINUTES')
+        disableConcurrentBuilds()
+    }
+    stages{
+        stage('Checkout'){
+            steps{
+                echo 'Checkout... ' + env.BRANCH_NAME
+                checkout([
+                            $class: 'GitSCM',
+                            branches: scm.branches,
+                            userRemoteConfigs: scm.userRemoteConfigs
+                        ])
+            }
+        }
+        stage('Tests'){
+            steps{
+                sh '/opt/gradle/gradle-8.5/bin/gradle test'
+            }
+        }
+        stage('Build'){
+            steps{
+                sh '/opt/gradle/gradle-8.5/bin/gradle build'
+            }
+        }
+        stage('Build & Push image'){
+            steps{
+                script{
+                    docker.withRegistry('https://registry.hub.docker.com', 'dockerhub') {   
+                        def app = docker.build("ygaros/storage")
+                        app.push("latest")        
+                    }   
+                }  
+            }
+        }    
+    }
+}

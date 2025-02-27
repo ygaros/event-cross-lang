@@ -1,0 +1,52 @@
+version: '3'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.3.1
+    restart: unless-stopped
+    logging:
+      driver: none
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+
+  kafka:
+    image: confluentinc/cp-kafka:7.3.1
+    restart: unless-stopped
+    ports:
+     - 9092:9092
+    depends_on:
+      - zookeeper
+    logging:
+      driver: none
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+  
+  delivery:
+    build:
+      dockerfile : delivery/docker/Dockerfile
+    depends_on:
+      - kafka
+    
+  order:
+    build:
+      dockerfile : order/docker/Dockerfile
+    ports:
+      - 7001:7001
+    depends_on:
+      - kafka
+
+  payment-mock:
+    build:
+      dockerfile : payment-mock/docker/Dockerfile
+    ports:
+      - 7002:7002
+    depends_on:
+      - kafka
+  
+  storage:
+    build:
+      dockerfile : storage/docker/Dockerfile
+    depends_on:
+      - kafka
